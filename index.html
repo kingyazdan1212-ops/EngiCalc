@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a12">
+  <meta name="description" content="EngCalc Premium — ماشین حساب مهندسی پیشرفته با تبدیل واحد">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>EngCalc Premium | ماشین حساب مهندسی</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%238b5cf6'/><text y='.9em' x='50%' text-anchor='middle' font-size='55' fill='white'>⚡</text></svg>">
+  <style>
+    :root {
+      --bg: #07070e;
+      --card: #12121c;
+      --card-2: #1a1a28;
+      --accent: #8b5cf6;
+      --accent-glow: rgba(139, 92, 246, 0.35);
+      --accent-2: #c4b5fd;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --danger: #f43f5e;
+      --success: #10b981;
+      --border: rgba(255,255,255,0.06);
+      --glass: rgba(255,255,255,0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(139, 92, 246, 0.15), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(59, 130, 246, 0.08), transparent);
+    }
+
+    /* Header */
+    .header {
+      padding: 14px 16px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      background: rgba(7, 7, 14, 0.75);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 17px;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logo span {
+      background: linear-gradient(135deg, #a78bfa, #e879f9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo .badge {
+      font-size: 9px;
+      background: linear-gradient(135deg, #8b5cf6, #d946ef);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      -webkit-text-fill-color: white;
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 3px;
+      gap: 2px;
+      border: 1px solid var(--border);
+    }
+
+    .tab {
+      padding: 7px 12px;
+      border-radius: 9px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      padding: 12px 14px 20px;
+      max-width: 440px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Display */
+    .display {
+      background: linear-gradient(145deg, #0e0e18, #141422);
+      border-radius: 20px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+      min-height: 105px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 8px 32px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .display::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(139,92,246,0.4), transparent);
+    }
+
+    .angle-mode {
+      position: absolute;
+      top: 10px;
+      left: 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-2);
+      background: rgba(139,92,246,0.12);
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid rgba(139,92,246,0.2);
+      transition: all 0.2s;
+    }
+
+    .angle-mode:hover {
+      background: rgba(139,92,246,0.25);
+    }
+
+    .expression {
+      color: var(--muted);
+      font-size: 14px;
+      min-height: 20px;
+      word-break: break-all;
+      direction: ltr;
+      text-align: left;
+      margin-bottom: 4px;
+      opacity: 0.8;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .result {
+      font-size: 38px;
+      font-weight: 700;
+      direction: ltr;
+      text-align: left;
+      word-break: break-all;
+      line-height: 1.15;
+      letter-spacing: -0.8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .result.error {
+      color: var(--danger);
+      font-size: 24px;
+    }
+
+    /* Memory bar */
+    .memory-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .mem-btn {
+      flex: 1;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .mem-btn:hover {
+      background: var(--card-2);
+      color: var(--accent-2);
+    }
+
+    .mem-btn.has-value {
+      color: var(--accent-2);
+      border-color: rgba(139,92,246,0.3);
+    }
+
+    /* Sci rows */
+    .sci-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+      margin-bottom: 8px;
+    }
+
+    .sci-row button {
+      height: 40px;
+      font-size: 12.5px;
+      border-radius: 11px;
+      background: rgba(139,92,246,0.08);
+      color: var(--accent-2);
+      border: 1px solid rgba(139,92,246,0.12);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .sci-row button:active {
+      transform: scale(0.93);
+      background: rgba(139,92,246,0.2);
+    }
+
+    /* Main buttons */
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 9px;
+    }
+
+    button.calc-btn {
+      height: 56px;
+      border: none;
+      border-radius: 15px;
+      font-size: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--text);
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button.calc-btn:active {
+      transform: scale(0.93);
+    }
+
+    .btn-num {
+      background: #1c1c2e;
+    }
+
+    .btn-num:hover {
+      background: #262640;
+    }
+
+    .btn-op {
+      background: #22223a;
+      color: var(--accent-2);
+    }
+
+    .btn-op:hover {
+      background: #2c2c4a;
+    }
+
+    .btn-fn {
+      background: #161625;
+      color: #94a3b8;
+      font-size: 15px;
+    }
+
+    .btn-fn:hover {
+      background: #1e1e32;
+    }
+
+    .btn-eq {
+      background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #d946ef 100%);
+      border: none;
+      box-shadow: 0 6px 24px var(--accent-glow);
+      font-size: 24px;
+    }
+
+    .btn-eq:hover {
+      box-shadow: 0 8px 28px rgba(139,92,246,0.5);
+    }
+
+    .btn-clear {
+      background: linear-gradient(135deg, #e11d48, #f43f5e);
+      border: none;
+      color: white;
+      font-weight: 700;
+    }
+
+    .btn-zero {
+      grid-column: span 2;
+    }
+
+    /* Unit Converter */
+    .converter, .history-panel {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .converter.active, .history-panel.active {
+      display: block;
+    }
+
+    .calc-panel.hidden {
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .unit-category {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+
+    .unit-category::-webkit-scrollbar { display: none; }
+
+    .cat-btn {
+      flex-shrink: 0;
+      padding: 9px 15px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .cat-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .unit-box {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+
+    .unit-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .unit-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .unit-input {
+      flex: 1;
+      background: #0a0a14;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 14px;
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 700;
+      direction: ltr;
+      text-align: left;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .unit-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .unit-select {
+      width: 160px;
+      background: #141422;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 10px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .swap-btn {
+      width: 100%;
+      margin: 6px 0 12px;
+      padding: 11px;
+      border-radius: 12px;
+      border: 1px dashed rgba(139,92,246,0.25);
+      background: transparent;
+      color: var(--accent-2);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .swap-btn:hover {
+      background: rgba(139,92,246,0.08);
+      border-style: solid;
+    }
+
+    /* History */
+    .history-item {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+      direction: ltr;
+      text-align: left;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .history-item:hover {
+      border-color: var(--accent);
+      background: #161625;
+    }
+
+    .history-result {
+      color: var(--text);
+      font-weight: 700;
+      margin-top: 3px;
+      font-size: 15px;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 20px;
+      font-size: 14px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 10px;
+      color: var(--muted);
+      opacity: 0.5;
+    }
+
+    .copy-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 100;
+      pointer-events: none;
+      box-shadow: 0 8px 24px var(--accent-glow);
+    }
+
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 380px) {
+      .result { font-size: 30px; }
+      button.calc-btn { height: 50px; font-size: 18px; }
+      .sci-row button { font-size: 11.5px; height: 36px; }
+      .tab { padding: 6px 9px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <span>⚡ EngCalc</span>
+      <span class="badge">PRO</span>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="calc">ماشین‌حساب</button>
+      <button class="tab" data-tab="unit">تبدیل واحد</button>
+      <button class="tab" data-tab="history">تاریخچه</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Calculator -->
+    <div class="calc-panel" id="calcPanel">
+      <div class="display">
+        <div class="angle-mode" id="angleMode" onclick="toggleAngle()">DEG</div>
+        <div class="expression" id="expression"></div>
+        <div class="result" id="result" onclick="copyResult()">0</div>
+      </div>
+
+      <div class="memory-bar">
+        <button class="mem-btn" id="mcBtn" onclick="memClear()">MC</button>
+        <button class="mem-btn" id="mrBtn" onclick="memRecall()">MR</button>
+        <button class="mem-btn" onclick="memAdd()">M+</button>
+        <button class="mem-btn" onclick="memSub()">M−</button>
+      </div>
+
+      <div class="sci-row">
+        <button onclick="appendFn('sin(')">sin</button>
+        <button onclick="appendFn('cos(')">cos</button>
+        <button onclick="appendFn('tan(')">tan</button>
+        <button onclick="appendFn('asin(')">asin</button>
+        <button onclick="appendFn('acos(')">acos</button>
+      </div>
+      <div class="sci-row">
+        <button onclick="appendFn('atan(')">atan</button>
+        <button onclick="appendFn('log(')">log</button>
+        <button onclick="appendFn('ln(')">ln</button>
+        <button onclick="appendFn('√(')">√</button>
+        <button onclick="appendOp('^')">xʸ</button>
+      </div>
+      <div class="sci-row">
+        <button onclick="appendFn('1/(')">1/x</button>
+        <button onclick="square()">x²</button>
+        <button onclick="factorial()">n!</button>
+        <button onclick="appendConst('π')">π</button>
+        <button onclick="appendConst('e')">e</button>
+      </div>
+
+      <div class="buttons">
+        <button class="calc-btn btn-clear" onclick="clearAll()">C</button>
+        <button class="calc-btn btn-fn" onclick="backspace()">⌫</button>
+        <button class="calc-btn btn-fn" onclick="appendParen()">( )</button>
+        <button class="calc-btn btn-op" onclick="appendOp('/')">÷</button>
+
+        <button class="calc-btn btn-num" onclick="appendNum('7')">7</button>
+        <button class="calc-btn btn-num" onclick="appendNum('8')">8</button>
+        <button class="calc-btn btn-num" onclick="appendNum('9')">9</button>
+        <button class="calc-btn btn-op" onclick="appendOp('*')">×</button>
+
+        <button class="calc-btn btn-num" onclick="appendNum('4')">4</button>
+        <button class="calc-btn btn-num" onclick="appendNum('5')">5</button>
+        <button class="calc-btn btn-num" onclick="appendNum('6')">6</button>
+        <button class="calc-btn btn-op" onclick="appendOp('-')">−</button>
+
+        <button class="calc-btn btn-num" onclick="appendNum('1')">1</button>
+        <button class="calc-btn btn-num" onclick="appendNum('2')">2</button>
+        <button class="calc-btn btn-num" onclick="appendNum('3')">3</button>
+        <button class="calc-btn btn-op" onclick="appendOp('+')">+</button>
+
+        <button class="calc-btn btn-num btn-zero" onclick="appendNum('0')">0</button>
+        <button class="calc-btn btn-num" onclick="appendDecimal()">.</button>
+        <button class="calc-btn btn-eq" onclick="calculate()">=</button>
+      </div>
+    </div>
+
+    <!-- Unit Converter -->
+    <div class="converter" id="unitPanel">
+      <div class="unit-category" id="categories"></div>
+
+      <div class="unit-box">
+        <div class="unit-label">از</div>
+        <div class="unit-row">
+          <input type="number" class="unit-input" id="fromValue" value="1" oninput="convertUnits()" inputmode="decimal">
+          <select class="unit-select" id="fromUnit" onchange="convertUnits()"></select>
+        </div>
+      </div>
+
+      <button class="swap-btn" onclick="swapUnits()">⇅ جابه‌جایی واحدها</button>
+
+      <div class="unit-box">
+        <div class="unit-label">به</div>
+        <div class="unit-row">
+          <input type="number" class="unit-input" id="toValue" readonly>
+          <select class="unit-select" id="toUnit" onchange="convertUnits()"></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="history-panel" id="historyPanel">
+      <div id="historyList"></div>
+      <button class="calc-btn btn-fn" style="width:100%;margin-top:12px;height:44px" onclick="clearHistory()">پاک کردن تاریخچه</button>
+    </div>
+  </div>
+
+  <div class="footer">EngCalc Premium • آماده انتشار روی GitHub Pages</div>
+  <div class="copy-toast" id="toast">کپی شد ✓</div>
+
+  <script>
+    // ========== State ==========
+    let expr = '';
+    let justCalc = false;
+    let angleDeg = true;
+    let memory = parseFloat(localStorage.getItem('engcalc_mem') || '0');
+    let history = JSON.parse(localStorage.getItem('engcalc_history') || '[]');
+    let openParens = 0;
+
+    const expressionEl = document.getElementById('expression');
+    const resultEl = document.getElementById('result');
+    const angleEl = document.getElementById('angleMode');
+
+    // ========== Tabs ==========
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const name = tab.dataset.tab;
+        document.getElementById('calcPanel').classList.toggle('hidden', name !== 'calc');
+        document.getElementById('unitPanel').classList.toggle('active', name === 'unit');
+        document.getElementById('historyPanel').classList.toggle('active', name === 'history');
+        if (name === 'history') renderHistory();
+      });
+    });
+
+    // ========== Display ==========
+    function updateDisplay() {
+      expressionEl.textContent = expr;
+      if (!expr) {
+        resultEl.textContent = '0';
+        resultEl.classList.remove('error');
+        return;
+      }
+      try {
+        const val = safeEval(expr);
+        if (val !== null && isFinite(val)) {
+          resultEl.textContent = format(val);
+          resultEl.classList.remove('error');
+        } else {
+          resultEl.textContent = expr;
+          resultEl.classList.remove('error');
+        }
+      } catch {
+        resultEl.textContent = expr;
+      }
+    }
+
+    function format(n) {
+      if (n === 0) return '0';
+      if (Math.abs(n) < 1e-9 || Math.abs(n) > 1e12) return n.toExponential(6);
+      if (Number.isInteger(n)) return n.toLocaleString('en-US');
+      const s = parseFloat(n.toPrecision(12)).toString();
+      return s;
+    }
+
+    function safeEval(str) {
+      let s = str
+        .replace(/×/g, '*')
+        .replace(/÷/g, '/')
+        .replace(/−/g, '-')
+        .replace(/π/g, 'Math.PI')
+        .replace(/\be\b/g, 'Math.E')
+        .replace(/√\(/g, 'Math.sqrt(')
+        .replace(/\^/g, '**');
+
+      // Trig with angle mode
+      const toRad = angleDeg ? '(Math.PI/180)*' : '';
+      const fromRad = angleDeg ? '*(180/Math.PI)' : '';
+
+      s = s
+        .replace(/sin\(/g, `Math.sin(${toRad}`)
+        .replace(/cos\(/g, `Math.cos(${toRad}`)
+        .replace(/tan\(/g, `Math.tan(${toRad}`)
+        .replace(/asin\(/g, `(Math.asin(`)
+        .replace(/acos\(/g, `(Math.acos(`)
+        .replace(/atan\(/g, `(Math.atan(`)
+        .replace(/log\(/g, 'Math.log10(')
+        .replace(/ln\(/g, 'Math.log(');
+
+      // Close extra parens for inverse trig + angle conversion
+      // We handle it by wrapping: asin(x) becomes (Math.asin(x)*fromRad)
+      // But since replace already added (, we need careful handling.
+      // Simpler approach: post-process inverse functions
+
+      // Auto close parentheses
+      const open = (s.match(/\(/g) || []).length;
+      const close = (s.match(/\)/g) || []).length;
+      s += ')'.repeat(Math.max(0, open - close));
+
+      // Apply degree conversion for inverse trig after closing
+      if (angleDeg) {
+        s = s.replace(/\(Math\.asin\(([^)]+)\)/g, '((Math.asin($1)*180/Math.PI)')
+             .replace(/\(Math\.acos\(([^)]+)\)/g, '((Math.acos($1)*180/Math.PI)')
+             .replace(/\(Math\.atan\(([^)]+)\)/g, '((Math.atan($1)*180/Math.PI)');
+      }
+
+      if (/[+\-*/**]$/.test(s)) s = s.slice(0, -1);
+      if (!s) return null;
+
+      try {
+        return Function('"use strict"; return (' + s + ')')();
+      } catch {
+        return null;
+      }
+    }
+
+    // ========== Input ==========
+    function appendNum(n) {
+      if (justCalc) { expr = ''; justCalc = false; openParens = 0; }
+      expr += n;
+      updateDisplay();
+    }
+
+    function appendOp(op) {
+      if (!expr && op !== '-') return;
+      justCalc = false;
+      if (/[+\-*/^×÷−]$/.test(expr)) {
+        expr = expr.slice(0, -1) + op;
+      } else {
+        expr += op;
+      }
+      updateDisplay();
+    }
+
+    function appendFn(fn) {
+      if (justCalc) { expr = ''; justCalc = false; openParens = 0; }
+      expr += fn;
+      if (fn.endsWith('(')) openParens++;
+      updateDisplay();
+    }
+
+    function appendConst(c) {
+      if (justCalc) { expr = ''; justCalc = false; openParens = 0; }
+      expr += c;
+      updateDisplay();
+    }
+
+    function appendParen() {
+      if (justCalc) { expr = ''; justCalc = false; openParens = 0; }
+      // Smart parentheses: if we have open ones and last char is number/const/), close; else open
+      const last = expr.slice(-1);
+      if (openParens > 0 && (/\d|[)πe]/.test(last) || last === '')) {
+        expr += ')';
+        openParens--;
+      } else {
+        expr += '(';
+        openParens++;
+      }
+      updateDisplay();
+    }
+
+    function appendDecimal() {
+      if (justCalc) { expr = '0'; justCalc = false; openParens = 0; }
+      const parts = expr.split(/[+\-*/^×÷−()]/);
+      const last = parts[parts.length - 1];
+      if (!last.includes('.')) {
+        if (!last || /[+\-*/^×÷−(]$/.test(expr)) expr += '0.';
+        else expr += '.';
+        updateDisplay();
+      }
+    }
+
+    function clearAll() {
+      expr = '';
+      justCalc = false;
+      openParens = 0;
+      updateDisplay();
+    }
+
+    function backspace() {
+      if (justCalc) { expr = ''; justCalc = false; openParens = 0; }
+      else {
+        const last = expr.slice(-1);
+        if (last === '(') openParens = Math.max(0, openParens - 1);
+        if (last === ')') openParens++;
+        expr = expr.slice(0, -1);
+      }
+      updateDisplay();
+    }
+
+    function square() {
+      if (!expr) return;
+      const v = safeEval(expr);
+      if (v !== null) {
+        expr = format(v * v);
+        justCalc = true;
+        updateDisplay();
+      }
+    }
+
+    function factorial() {
+      if (!expr) return;
+      const v = safeEval(expr);
+      if (v === null || v < 0 || !Number.isInteger(v) || v > 170) {
+        resultEl.textContent = 'خطا';
+        resultEl.classList.add('error');
+        return;
+      }
+      let r = 1;
+      for (let i = 2; i <= v; i++) r *= i;
+      expr = format(r);
+      justCalc = true;
+      updateDisplay();
+    }
+
+    function calculate() {
+      if (!expr) return;
+      const v = safeEval(expr);
+      if (v !== null && isFinite(v)) {
+        history.unshift({ expr: expr, result: format(v) });
+        if (history.length > 40) history.pop();
+        localStorage.setItem('engcalc_history', JSON.stringify(history));
+
+        expressionEl.textContent = expr + ' =';
+        resultEl.textContent = format(v);
+        resultEl.classList.remove('error');
+        expr = format(v).replace(/,/g, '');
+        justCalc = true;
+        openParens = 0;
+      } else {
+        resultEl.textContent = 'خطا';
+        resultEl.classList.add('error');
+      }
+    }
+
+    function toggleAngle() {
+      angleDeg = !angleDeg;
+      angleEl.textContent = angleDeg ? 'DEG' : 'RAD';
+      updateDisplay();
+    }
+
+    function copyResult() {
+      const text = resultEl.textContent;
+      if (text && text !== '0' && text !== 'خطا') {
+        navigator.clipboard.writeText(text.replace(/,/g, '')).then(() => {
+          const toast = document.getElementById('toast');
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 1500);
+        });
+      }
+    }
+
+    // ========== Memory ==========
+    function updateMemBtns() {
+      const has = memory !== 0;
+      document.getElementById('mcBtn').classList.toggle('has-value', has);
+      document.getElementById('mrBtn').classList.toggle('has-value', has);
+    }
+
+    function memClear() {
+      memory = 0;
+      localStorage.setItem('engcalc_mem', '0');
+      updateMemBtns();
+    }
+
+    function memRecall() {
+      if (justCalc) { expr = ''; justCalc = false; }
+      expr += format(memory).replace(/,/g, '');
+      updateDisplay();
+    }
+
+    function memAdd() {
+      const v = safeEval(expr || resultEl.textContent);
+      if (v !== null) {
+        memory += v;
+        localStorage.setItem('engcalc_mem', memory.toString());
+        updateMemBtns();
+      }
+    }
+
+    function memSub() {
+      const v = safeEval(expr || resultEl.textContent);
+      if (v !== null) {
+        memory -= v;
+        localStorage.setItem('engcalc_mem', memory.toString());
+        updateMemBtns();
+      }
+    }
+
+    // ========== History ==========
+    function renderHistory() {
+      const list = document.getElementById('historyList');
+      if (history.length === 0) {
+        list.innerHTML = '<div class="empty-state">تاریخچه‌ای وجود ندارد<br><small>محاسبات شما اینجا ذخیره می‌شوند</small></div>';
+        return;
+      }
+      list.innerHTML = history.map((h, i) => `
+        <div class="history-item" onclick="loadHistory(${i})">
+          <div>${h.expr}</div>
+          <div class="history-result">= ${h.result}</div>
+        </div>
+      `).join('');
+    }
+
+    function loadHistory(i) {
+      expr = history[i].result.replace(/,/g, '');
+      justCalc = true;
+      openParens = 0;
+      updateDisplay();
+      document.querySelector('[data-tab="calc"]').click();
+    }
+
+    function clearHistory() {
+      history = [];
+      localStorage.removeItem('engcalc_history');
+      renderHistory();
+    }
+
+    // ========== Unit Converter ==========
+    const units = {
+      length: {
+        name: 'طول',
+        list: {
+          mm:  { label: 'میلی‌متر (mm)',   factor: 0.001 },
+          cm:  { label: 'سانتی‌متر (cm)',  factor: 0.01 },
+          m:   { label: 'متر (m)',         factor: 1 },
+          km:  { label: 'کیلومتر (km)',    factor: 1000 },
+          in:  { label: 'اینچ (in)',       factor: 0.0254 },
+          ft:  { label: 'فوت (ft)',        factor: 0.3048 },
+          yd:  { label: 'یارد (yd)',       factor: 0.9144 },
+          mi:  { label: 'مایل (mi)',       factor: 1609.344 },
+          nmi: { label: 'مایل دریایی (NM)', factor: 1852 },
+          mil: { label: 'میل (mil)',       factor: 0.0000254 },
+          μm:  { label: 'میکرومتر (μm)',   factor: 1e-6 },
+          nm:  { label: 'نانومتر (nm)',    factor: 1e-9 }
+        }
+      },
+      area: {
+        name: 'سطح',
+        list: {
+          mm2:  { label: 'میلی‌متر مربع (mm²)', factor: 1e-6 },
+          cm2:  { label: 'سانتی‌متر مربع (cm²)', factor: 1e-4 },
+          m2:   { label: 'متر مربع (m²)',       factor: 1 },
+          km2:  { label: 'کیلومتر مربع (km²)',  factor: 1e6 },
+          ha:   { label: 'هکتار (ha)',          factor: 10000 },
+          acre: { label: 'جریب (acre)',         factor: 4046.85642 },
+          ft2:  { label: 'فوت مربع (ft²)',      factor: 0.092903 },
+          in2:  { label: 'اینچ مربع (in²)',     factor: 0.00064516 },
+          yd2:  { label: 'یارد مربع (yd²)',     factor: 0.836127 }
+        }
+      },
+      temperature: {
+        name: 'دما',
+        special: true,
+        list: {
+          C: { label: 'سلسیوس (°C)' },
+          F: { label: 'فارنهایت (°F)' },
+          K: { label: 'کلوین (K)' },
+          R: { label: 'رانکین (°R)' }
+        }
+      },
+      volume: {
+        name: 'حجم',
+        list: {
+          mm3: { label: 'میلی‌متر مکعب (mm³)', factor: 1e-9 },
+          cm3: { label: 'سانتی‌متر مکعب (cm³)', factor: 1e-6 },
+          mL:  { label: 'میلی‌لیتر (mL)',      factor: 1e-6 },
+          L:   { label: 'لیتر (L)',            factor: 0.001 },
+          m3:  { label: 'متر مکعب (m³)',       factor: 1 },
+          gal: { label: 'گالن (gal)',          factor: 0.00378541 },
+          qt:  { label: 'کوارت (qt)',          factor: 0.000946353 },
+          ft3: { label: 'فوت مکعب (ft³)',      factor: 0.0283168 },
+          in3: { label: 'اینچ مکعب (in³)',     factor: 1.6387e-5 }
+        }
+      },
+      mass: {
+        name: 'جرم',
+        list: {
+          mg:  { label: 'میلی‌گرم (mg)',  factor: 1e-6 },
+          g:   { label: 'گرم (g)',        factor: 0.001 },
+          kg:  { label: 'کیلوگرم (kg)',   factor: 1 },
+          t:   { label: 'تن (t)',         factor: 1000 },
+          lb:  { label: 'پوند (lb)',      factor: 0.45359237 },
+          oz:  { label: 'اونس (oz)',      factor: 0.028349523 },
+          ct:  { label: 'قیراط (ct)',     factor: 0.0002 },
+          st:  { label: 'استون (st)',     factor: 6.35029 }
+        }
+      },
+      data: {
+        name: 'داده',
+        list: {
+          bit:  { label: 'بیت (bit)',     factor: 0.125 },
+          B:    { label: 'بایت (B)',      factor: 1 },
+          KB:   { label: 'کیلوبایت (KB)', factor: 1024 },
+          MB:   { label: 'مگابایت (MB)',  factor: 1048576 },
+          GB:   { label: 'گیگابایت (GB)', factor: 1073741824 },
+          TB:   { label: 'ترابایت (TB)',  factor: 1099511627776 },
+          PB:   { label: 'پتابایت (PB)',  factor: 1125899906842624 }
+        }
+      },
+      speed: {
+        name: 'سرعت',
+        list: {
+          'mps':  { label: 'متر بر ثانیه (m/s)',   factor: 1 },
+          'kmh':  { label: 'کیلومتر بر ساعت (km/h)', factor: 0.277778 },
+          'mph':  { label: 'مایل بر ساعت (mph)',   factor: 0.44704 },
+          'knot': { label: 'گره (knot)',           factor: 0.514444 },
+          'fps':  { label: 'فوت بر ثانیه (ft/s)',  factor: 0.3048 },
+          'Mach': { label: 'ماخ (Mach)',           factor: 340.29 }
+        }
+      },
+      pressure: {
+        name: 'فشار',
+        list: {
+          Pa:   { label: 'پاسکال (Pa)',     factor: 1 },
+          kPa:  { label: 'کیلوپاسکال (kPa)', factor: 1000 },
+          MPa:  { label: 'مگاپاسکال (MPa)', factor: 1e6 },
+          bar:  { label: 'بار (bar)',       factor: 1e5 },
+          atm:  { label: 'اتمسفر (atm)',    factor: 101325 },
+          psi:  { label: 'پی‌اس‌آی (psi)',  factor: 6894.76 },
+          mmHg: { label: 'میلی‌متر جیوه (mmHg)', factor: 133.322 },
+          torr: { label: 'تور (torr)',      factor: 133.322 }
+        }
+      },
+      energy: {
+        name: 'انرژی',
+        list: {
+          J:    { label: 'ژول (J)',          factor: 1 },
+          kJ:   { label: 'کیلوژول (kJ)',     factor: 1000 },
+          cal:  { label: 'کالری (cal)',      factor: 4.184 },
+          kcal: { label: 'کیلوکالری (kcal)', factor: 4184 },
+          Wh:   { label: 'وات‌ساعت (Wh)',    factor: 3600 },
+          kWh:  { label: 'کیلووات‌ساعت (kWh)', factor: 3.6e6 },
+          eV:   { label: 'الکترون‌ولت (eV)', factor: 1.602176634e-19 },
+          BTU:  { label: 'بی‌تی‌یو (BTU)',   factor: 1055.06 }
+        }
+      },
+      power: {
+        name: 'توان',
+        list: {
+          W:    { label: 'وات (W)',         factor: 1 },
+          kW:   { label: 'کیلووات (kW)',    factor: 1000 },
+          MW:   { label: 'مگاوات (MW)',     factor: 1e6 },
+          hp:   { label: 'اسب بخار (hp)',   factor: 745.7 },
+          PS:   { label: 'اسب بخار متریک (PS)', factor: 735.5 }
+        }
+      },
+      force: {
+        name: 'نیرو',
+        list: {
+          N:   { label: 'نیوتن (N)',       factor: 1 },
+          kN:  { label: 'کیلونیوتن (kN)',  factor: 1000 },
+          lbf: { label: 'پوند-نیرو (lbf)', factor: 4.44822 },
+          kgf: { label: 'کیلوگرم-نیرو (kgf)', factor: 9.80665 }
+        }
+      },
+      time: {
+        name: 'زمان',
+        list: {
+          ms:   { label: 'میلی‌ثانیه (ms)', factor: 0.001 },
+          s:    { label: 'ثانیه (s)',       factor: 1 },
+          min:  { label: 'دقیقه (min)',     factor: 60 },
+          h:    { label: 'ساعت (h)',        factor: 3600 },
+          day:  { label: 'روز (day)',       factor: 86400 },
+          week: { label: 'هفته (week)',     factor: 604800 },
+          year: { label: 'سال (year)',      factor: 31536000 }
+        }
+      }
+    };
+
+    let currentCat = 'length';
+
+    function initUnits() {
+      const cats = document.getElementById('categories');
+      cats.innerHTML = Object.keys(units).map(k =>
+        `<button class="cat-btn ${k === currentCat ? 'active' : ''}" data-cat="${k}">${units[k].name}</button>`
+      ).join('');
+
+      cats.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          cats.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentCat = btn.dataset.cat;
+          populateUnits();
+          convertUnits();
+        });
+      });
+      populateUnits();
+      convertUnits();
+    }
+
+    function populateUnits() {
+      const fromSel = document.getElementById('fromUnit');
+      const toSel = document.getElementById('toUnit');
+      const cat = units[currentCat];
+      const options = Object.keys(cat.list).map(u => 
+        `<option value="${u}">${cat.list[u].label}</option>`
+      ).join('');
+      fromSel.innerHTML = options;
+      toSel.innerHTML = options;
+      if (toSel.options.length > 1) toSel.selectedIndex = 1;
+    }
+
+    function convertUnits() {
+      const fromVal = parseFloat(document.getElementById('fromValue').value);
+      if (isNaN(fromVal)) {
+        document.getElementById('toValue').value = '';
+        return;
+      }
+      const fromU = document.getElementById('fromUnit').value;
+      const toU = document.getElementById('toUnit').value;
+      const cat = units[currentCat];
+      let result;
+
+      if (cat.special) {
+        let c;
+        if (fromU === 'C') c = fromVal;
+        else if (fromU === 'F') c = (fromVal - 32) * 5/9;
+        else if (fromU === 'K') c = fromVal - 273.15;
+        else c = (fromVal - 491.67) * 5/9;
+
+        if (toU === 'C') result = c;
+        else if (toU === 'F') result = c * 9/5 + 32;
+        else if (toU === 'K') result = c + 273.15;
+        else result = (c + 273.15) * 9/5;
+      } else {
+        result = (fromVal * cat.list[fromU].factor) / cat.list[toU].factor;
+      }
+
+      document.getElementById('toValue').value = Number.isInteger(result)
+        ? result
+        : parseFloat(result.toPrecision(10));
+    }
+
+    function swapUnits() {
+      const fromSel = document.getElementById('fromUnit');
+      const toSel = document.getElementById('toUnit');
+      const fromVal = document.getElementById('fromValue');
+      const toVal = document.getElementById('toValue');
+      const tmpU = fromSel.value;
+      fromSel.value = toSel.value;
+      toSel.value = tmpU;
+      fromVal.value = toVal.value;
+      convertUnits();
+    }
+
+    // ========== Keyboard ==========
+    document.addEventListener('keydown', e => {
+      if (document.getElementById('unitPanel').classList.contains('active')) return;
+      if (e.key >= '0' && e.key <= '9') appendNum(e.key);
+      else if (e.key === '.') appendDecimal();
+      else if (e.key === '+') appendOp('+');
+      else if (e.key === '-') appendOp('-');
+      else if (e.key === '*') appendOp('*');
+      else if (e.key === '/') { e.preventDefault(); appendOp('/'); }
+      else if (e.key === 'Enter' || e.key === '=') calculate();
+      else if (e.key === 'Backspace') backspace();
+      else if (e.key === 'Escape' || e.key.toLowerCase() === 'c') clearAll();
+      else if (e.key === '^') appendOp('^');
+      else if (e.key === '(' || e.key === ')') appendParen();
+    });
+
+    // Init
+    updateDisplay();
+    updateMemBtns();
+    initUnits();
+  </script>
+</body>
+</html>
